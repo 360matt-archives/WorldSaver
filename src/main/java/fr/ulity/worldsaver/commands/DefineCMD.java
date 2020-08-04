@@ -22,19 +22,13 @@ public class DefineCMD extends CommandManager.Assisted {
         if (requirePlayer()) {
 
             World currentWorld = getPlayer().getWorld();
-            new Save(currentWorld, new Chunk[]{}, "Test") {
+
+            new Save(currentWorld, new Chunk[]{getPlayer().getLocation().getChunk()}, "Test") {
                 @Override
                 public void callback(StatusPassed name) {
-                    Bukkit.broadcastMessage("Voila");
+                    Bukkit.broadcastMessage(name + ": Voila");
                 }
             }.make();
-
-
-
-
-
-
-
 
 
 
