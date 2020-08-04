@@ -19,7 +19,6 @@ public final class WorldSaver extends JavaPlugin {
 
 
 
-
         // Plugin startup logic
 
     }
