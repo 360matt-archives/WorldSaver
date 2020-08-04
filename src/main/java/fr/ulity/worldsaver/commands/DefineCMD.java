@@ -25,8 +25,20 @@ public class DefineCMD extends CommandManager.Assisted {
 
             new Save(currentWorld, new Chunk[]{getPlayer().getLocation().getChunk()}, "Test") {
                 @Override
-                public void callback(StatusPassed name) {
-                    Bukkit.broadcastMessage(name + ": Voila");
+                public void callback (StatusPassed name) {
+                    if (name.equals(StatusPassed.BLOCK_ID_INITIALISED)) {
+                        sender.sendMessage("§b[WS] §3Initialisation des ID ...");
+                    } else if (name.equals(StatusPassed.EMPTY_WORLD_CREATED)) {
+                        sender.sendMessage("§b[WS] §3Récupération de la map par défaut ...");
+                        sender.sendMessage("§b[WS] §3/!\\ Cela peut prendre un instant ...");
+                    } else if (name.equals(StatusPassed.SAVING) && cooldown(3)) {
+                        sender.sendMessage(
+                                "§b[WS] §3Progression: §c%progress%% §3: (§b%passedChunks% §3/ §b%totalChunks% chunks §3analysés)"
+                                .replaceAll("%progress%", String.valueOf(progress))
+                                .replaceAll("%passedChunks%", String.valueOf(passedChunks))
+                                .replaceAll("%totalChunks%", String.valueOf(totalChunks))
+                        );
+                    }
                 }
             }.make();
 
