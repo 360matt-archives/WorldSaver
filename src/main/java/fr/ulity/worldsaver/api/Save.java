@@ -83,15 +83,12 @@ public abstract class Save {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
 
-
-
                     for (int y = 0; y < world.getMaxHeight(); y++) {
                         List<String> list = new ArrayList<>();
 
                         Material bloc = ch.getBlock(x, y, z).getType();
                         Material defaultBloc = al.getBlock(x, y, z).getType();
                         if (bloc != defaultBloc) {
-
                             final int inittialY = y;
 
                             int count = 0;
@@ -109,10 +106,7 @@ public abstract class Save {
                                 chunkChanges.put(x + "-" + inittialY + "-" + z, list);
                         }
 
-
                     }
-
-
 
                 }
             }
