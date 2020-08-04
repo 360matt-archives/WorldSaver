@@ -1,6 +1,6 @@
 name: Worldsaver
 version: ${project.version}
-main: fr.ulity.fr.ulity.worldsaver.WorldSaver
+main: fr.ulity.worldsaver.WorldSaver
 api-version: 1.16
 prefix: Worldsaver
 depend: [UlityCore]
