@@ -3,6 +3,7 @@ package fr.ulity.worldsaver.api;
 import fr.ulity.core.api.Config;
 import fr.ulity.core.api.Data;
 import fr.ulity.worldsaver.WorldSaver;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.*;
 
 
@@ -18,7 +19,7 @@ public abstract class Save {
     private Config blockID;
 
 
-    private HashMap<String, HashMap<String, String>> changes = new HashMap<>();
+    private final HashMap<String, HashMap<String, String>> changes = new HashMap<>();
 
 
     public Save (World world, Chunk[] chunks, String filename) {
@@ -32,8 +33,10 @@ public abstract class Save {
         pregen(); // generate blocks ID, in the version of server
         copyEmptyWorld(); // create a empty world with the same seed
         loadChunks(); // enable all chunks of Empty world
-        Store(); // compare world to empty world
+        store(); // compare world to empty world, and add to HashMap
+        save(); // save in file
 
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> FileUtils.deleteQuietly(emptyWorld.getWorldFolder())));
 
     }
 
@@ -79,81 +82,69 @@ public abstract class Save {
     public int passedChunks = 0;
     public int progress = 0;
 
-    private void Store () {
+    private void store () {
+        for (Chunk ch : chunks) {
+
+            final Chunk al = emptyWorld.getChunkAt(ch.getX(), ch.getZ());
+
+            HashMap<String, String> chunkChanges = new HashMap<>();
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
 
 
-            for (Chunk ch : chunks) {
+                    for (int y = 0; y < world.getMaxHeight(); y++) {
+                        Material bloc = ch.getBlock(x, y, z).getType();
+                        Material defaultBloc = al.getBlock(x, y, z).getType();
 
+                        if (!bloc.equals(defaultBloc)) {
+                            Material blocUp = ch.getBlock(x, Math.min(y + 1, world.getMaxHeight()-1), z).getType();
 
-                    final Chunk al = emptyWorld.getChunkAt(ch.getX(), ch.getZ());
+                            int count = 0;
+                            final int inittialY = y;
 
-                    HashMap<String, String> chunkChanges = new HashMap<>();
-                    for (int x = 0; x < 16; x++) {
-                        for (int z = 0; z < 16; z++) {
-
-                            for (int y = 0; y < world.getMaxHeight(); y++) {
-                                Material bloc = ch.getBlock(x, y, z).getType();
-                                Material defaultBloc = al.getBlock(x, y, z).getType();
+                            while (bloc.equals(blocUp) && y < world.getMaxHeight()) {
+                                defaultBloc = al.getBlock(x, y, z).getType();
+                                bloc = ch.getBlock(x, y, z).getType();
+                                blocUp = ch.getBlock(x, Math.min(y + 1, world.getMaxHeight()-1), z).getType();
 
                                 if (!bloc.equals(defaultBloc)) {
-                                    Material blocUp = ch.getBlock(x, Math.min(y + 1, world.getMaxHeight()-1), z).getType();
-
-                                    int count = 0;
-                                    final int inittialY = y;
-
-                                    while (bloc.equals(blocUp) && y < world.getMaxHeight()) {
-                                        defaultBloc = al.getBlock(x, y, z).getType();
-                                        bloc = ch.getBlock(x, y, z).getType();
-                                        blocUp = ch.getBlock(x, Math.min(y + 1, world.getMaxHeight()-1), z).getType();
-
-
-                                        if (!bloc.equals(defaultBloc)) {
-                                            count++;
-                                            y++;
-                                        } else break;
-                                    }
-
-                                    chunkChanges.put(x + "|" + inittialY + "|" + z, blockID.getString(bloc.name()) + "#" + Math.max(1, count));
-                                }
-
+                                    count++;
+                                    y++;
+                                } else break;
                             }
 
-
+                            chunkChanges.put(x + "|" + inittialY + "|" + z, blockID.getString(bloc.name()) + "#" + Math.max(1, count));
                         }
                     }
 
-                    if (chunkChanges.size() > 0)
-                        changes.put(ch.getX() + "|" + ch.getZ(), chunkChanges);
-
-                    al.unload();
-                    ch.unload();
-
-                    passedChunks++;
-                    progress = (int) Math.floor(passedChunks/chunks.length)*100;
-
-                    callback(StatusPassed.SAVING);
-
-
-
-
+                }
             }
 
+            if (chunkChanges.size() > 0)
+                changes.put(ch.getX() + "|" + ch.getZ(), chunkChanges);
 
-            final Data file = new Data(filename, "/addons/WorldSaver/saves");
-            file.set("seed", world.getSeed());
-            file.set("chunks", changes);
+            al.unload();
+            ch.unload();
+
+            passedChunks++;
+            progress = (int) Math.floor(passedChunks/chunks.length)*100;
+
+            callback(StatusPassed.FETCHING);
+        }
+    }
 
 
 
-
-
-
+    public void save () {
+        final Data file = new Data(filename, "/addons/WorldSaver/saves");
+        file.set("seed", world.getSeed());
+        file.set("chunks", changes);
     }
 
 
 
 
-    public enum StatusPassed {BLOCK_ID_INITIALISED, EMPTY_WORLD_CREATED, LOAD_CHUNKS, SAVING }
+    public enum StatusPassed {BLOCK_ID_INITIALISED, EMPTY_WORLD_CREATED, LOAD_CHUNKS, FETCHING, OPTIMIZE, SAVING }
     public abstract void callback (StatusPassed status);
 
     Date lastCallBack = new Date();

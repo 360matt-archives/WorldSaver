@@ -33,7 +33,7 @@ public class DefineCMD extends CommandManager.Assisted {
                         sender.sendMessage("§b[WS] §3/!\\ Cela peut prendre un instant ...");
                     } else if (name.equals(StatusPassed.LOAD_CHUNKS)) {
                         sender.sendMessage("§b[WS] §3/!\\ Réveil des chunks ...");
-                    } else if (name.equals(StatusPassed.SAVING) && cooldown(3)) {
+                    } else if (name.equals(StatusPassed.FETCHING) && cooldown(3)) {
                         sender.sendMessage(
                                 "§b[WS] §3Progression: §c%progress%% §3: (§b%passedChunks% §3/ §b%totalChunks% chunks §3analysés)"
                                 .replaceAll("%progress%", String.valueOf(progress))
