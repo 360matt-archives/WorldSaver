@@ -61,6 +61,10 @@
             <id>sonatype</id>
             <url>https://oss.sonatype.org/content/groups/public/</url>
         </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -88,5 +92,6 @@
             <artifactId>commons-io</artifactId>
             <version>2.6</version>
         </dependency>
+
     </dependencies>
 </project>
