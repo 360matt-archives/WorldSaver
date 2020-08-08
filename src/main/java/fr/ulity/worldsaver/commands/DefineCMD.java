@@ -2,8 +2,6 @@ package fr.ulity.worldsaver.commands;
 
 import fr.ulity.core.api.CommandManager;
 import fr.ulity.worldsaver.api.Save;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandMap;
@@ -23,7 +21,7 @@ public class DefineCMD extends CommandManager.Assisted {
 
             World currentWorld = getPlayer().getWorld();
 
-            new Save(currentWorld, new Chunk[]{getPlayer().getLocation().getChunk()}, "Test") {
+            new Save(currentWorld, currentWorld.getLoadedChunks(), "Test") {
                 @Override
                 public void callback (StatusPassed name) {
                     if (name.equals(StatusPassed.BLOCK_ID_INITIALISED)) {

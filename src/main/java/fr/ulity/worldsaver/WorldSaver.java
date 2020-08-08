@@ -16,7 +16,12 @@ public final class WorldSaver extends JavaPlugin {
         Initializer init = new Initializer(this);
         init.requireVersion("2.4");
         if (init.ok) {
-            new DefineCMD(Api.Bukkit.commandMap, this);
+            try {
+                BlocksEnumsConfigs.generate();
+                new DefineCMD(Api.Bukkit.commandMap, this);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
 
 
