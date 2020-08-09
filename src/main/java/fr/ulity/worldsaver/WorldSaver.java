@@ -3,8 +3,9 @@ package fr.ulity.worldsaver;
 import fr.ulity.core.api.Api;
 import fr.ulity.core.api.Initializer;
 
+import fr.ulity.worldsaver.commands.RestoreCMD;
 import org.bukkit.plugin.java.JavaPlugin;
-import fr.ulity.worldsaver.commands.DefineCMD;
+import fr.ulity.worldsaver.commands.GenCMD;
 
 public final class WorldSaver extends JavaPlugin {
     public static WorldSaver plugin;
@@ -18,7 +19,8 @@ public final class WorldSaver extends JavaPlugin {
         if (init.ok) {
             try {
                 BlocksEnumsConfigs.generate();
-                new DefineCMD(Api.Bukkit.commandMap, this);
+                new GenCMD(Api.Bukkit.commandMap, this);
+                new RestoreCMD(Api.Bukkit.commandMap, this);
             } catch (Exception e) {
                 e.printStackTrace();
             }

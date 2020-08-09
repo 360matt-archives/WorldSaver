@@ -6,6 +6,7 @@ import fr.ulity.worldsaver.BlocksEnumsConfigs;
 import fr.ulity.worldsaver.WorldSaver;
 import fr.ulity.worldsaver.utils.Gzip;
 import org.bukkit.*;
+import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.Hash;
 
 
 import java.io.File;
@@ -29,13 +30,8 @@ public abstract class Save {
 
     public void make () {
         Bukkit.getScheduler().runTaskAsynchronously(WorldSaver.plugin, () -> {
-            try {
-                store(); // compare world to empty world, and add to HashMap
-                save(); // save in file
-                optimize();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            store(); // compare world to empty world, and add to HashMap
+            save(); // save in file
         });
     }
 
@@ -49,17 +45,21 @@ public abstract class Save {
                 HashMap<String, LinkedList<String>> chunkChanges = new HashMap<>();
                 for (int x = 0; x < 16; x++) {
                     for (int z = 0; z < 16; z++) {
+                        if (stopped)
+                            return;
 
                         LinkedList<String> lister = new LinkedList<>();
                         Material before = Material.AIR;
                         int count = 0;
 
-                        int maxHeight = world.getHighestBlockYAt(x, z);
-                        /* for (int loop = world.getMaxHeight()-1; loop > 0; loop--)
-                            if (!ch.getBlock(x, loop, z).getType().isAir())
-                                maxHeight = loop; */
+                        int maxHeight = 0;
+                        for (int loop = world.getMaxHeight()-1; loop >= 0; loop--)
+                            if (!ch.getBlock(x, loop, z).getType().isAir()) {
+                                maxHeight = loop + 1;
+                                break;
+                            }
 
-                        for (int y = 1; y < maxHeight; y++) {
+                        for (int y = 1; y <= maxHeight; y++) {
                             Material current = ch.getBlock(x, y, z).getType();
 
                             if (current.equals(before) && y+1 < maxHeight)
@@ -90,11 +90,6 @@ public abstract class Save {
     }
 
 
-    private void optimize () {
-
-    }
-
-
     public void save () {
         try {
             File temp = File.createTempFile("worldsaver_" + filename + "_", ".json");
@@ -105,7 +100,7 @@ public abstract class Save {
             newFile.createNewFile();
 
             final Json file = new Json(temp);
-            file.set("chunks", changes);
+            file.putAll(new HashMap<>(changes));
 
             Gzip.compressGZIP(temp, newFile);
 
@@ -118,7 +113,15 @@ public abstract class Save {
 
 
 
-    public enum StatusPassed {BLOCK_ID_INITIALISED, EMPTY_WORLD_CREATED, LOAD_CHUNKS, FETCHING, SAVING }
+
+    public boolean stopped = false;
+    public void stop () {
+        stopped = true;
+        callback(StatusPassed.STOPPED);
+    }
+
+
+    public enum StatusPassed {BLOCK_ID_INITIALISED, EMPTY_WORLD_CREATED, LOAD_CHUNKS, FETCHING, SAVING, STOPPED }
     public abstract void callback (StatusPassed status);
 
     Date lastCallBack = new Date();
