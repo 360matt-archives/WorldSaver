@@ -51,7 +51,7 @@ public abstract class Restore {
 
             try {
                 File json = File.createTempFile("ws_", ".json");
-                callback(StatusPassed.DECOMPRESSED);
+                callback(StatusPassed.DECOMPRESSING);
                 Gzip.decompressGzip(file, json);
                 callback(StatusPassed.DECOMPRESSED);
 
