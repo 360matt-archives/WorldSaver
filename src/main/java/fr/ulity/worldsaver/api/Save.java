@@ -9,8 +9,7 @@ import org.bukkit.*;
 import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.Hash;
 
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public abstract class Save {
@@ -93,16 +92,22 @@ public abstract class Save {
     public void save () {
         try {
             File temp = File.createTempFile("worldsaver_" + filename + "_", ".json");
-
-
-            File newFile = new File(Api.prefix + "/addons/WorldSaver/saves/" + filename + ".wsaver");
-            newFile.getParentFile().mkdir();
-            newFile.createNewFile();
+            File temp2 = File.createTempFile("worldsaver_" + filename + "_", ".json");
 
             final Json file = new Json(temp);
             file.putAll(new HashMap<>(changes));
 
-            Gzip.compressGZIP(temp, newFile);
+            try(BufferedReader br = new BufferedReader(new FileReader(temp));
+                FileWriter fw = new FileWriter(temp2)) {
+                String st;
+                while((st = br.readLine()) != null)
+                    fw.write(st.replaceAll("\\s+", "").replaceAll("\n", "").trim());
+            } catch (IOException e) { e.printStackTrace(); }
+
+            File newFile = new File(Api.prefix + "/addons/WorldSaver/saves/" + filename + ".wsaver");
+            newFile.getParentFile().mkdir();
+            newFile.createNewFile();
+            Gzip.compressGZIP(temp2, newFile);
 
             callback(StatusPassed.SAVING);
         } catch (IOException e) {
