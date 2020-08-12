@@ -1,9 +1,8 @@
 package fr.ulity.worldsaver.api;
 
 import de.leonhard.storage.Json;
-import fr.ulity.core.api.Api;
 import fr.ulity.worldsaver.BlocksEnumsConfigs;
-import fr.ulity.worldsaver.WorldSaver;
+import fr.ulity.worldsaver.WorldSaverApi;
 import fr.ulity.worldsaver.exceptions.BackupNotFoundException;
 import fr.ulity.worldsaver.utils.Gzip;
 import org.bukkit.Bukkit;
@@ -25,7 +24,7 @@ public abstract class Restore {
         this.world = world;
         this.filename = filename;
 
-        this.file = new File(Api.prefix + "/addons/WorldSaver/saves/" + filename + ".wsaver");
+        this.file = new File(WorldSaverApi.mainPath + "/saves/" + filename + ".wsaver");
         if (!this.file.exists())
             throw new BackupNotFoundException(filename);
 
@@ -46,7 +45,7 @@ public abstract class Restore {
     public int progress;
     private void restore (boolean all, Chunk[] chunks)  {
 
-        Bukkit.getScheduler().scheduleSyncDelayedTask(WorldSaver.plugin, () -> {
+        Bukkit.getScheduler().scheduleSyncDelayedTask(WorldSaverApi.plugin, () -> {
             List<Chunk> chunksPermitted = Arrays.asList(chunks);
 
             try {

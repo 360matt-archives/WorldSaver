@@ -1,12 +1,10 @@
 package fr.ulity.worldsaver.api;
 
 import de.leonhard.storage.Json;
-import fr.ulity.core.api.Api;
 import fr.ulity.worldsaver.BlocksEnumsConfigs;
-import fr.ulity.worldsaver.WorldSaver;
+import fr.ulity.worldsaver.WorldSaverApi;
 import fr.ulity.worldsaver.utils.Gzip;
 import org.bukkit.*;
-import org.bukkit.craftbukkit.libs.it.unimi.dsi.fastutil.Hash;
 
 
 import java.io.*;
@@ -28,7 +26,7 @@ public abstract class Save {
     }
 
     public void make () {
-        Bukkit.getScheduler().runTaskAsynchronously(WorldSaver.plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(WorldSaverApi.plugin, () -> {
             store(); // compare world to empty world, and add to HashMap
             save(); // save in file
         });
@@ -104,7 +102,7 @@ public abstract class Save {
                     fw.write(st.replaceAll("\\s+", "").replaceAll("\n", "").trim());
             } catch (IOException e) { e.printStackTrace(); }
 
-            File newFile = new File(Api.prefix + "/addons/WorldSaver/saves/" + filename + ".wsaver");
+            File newFile = new File(WorldSaverApi.mainPath + "/saves/" + filename + ".wsaver");
             newFile.getParentFile().mkdir();
             newFile.createNewFile();
             Gzip.compressGZIP(temp2, newFile);
@@ -126,7 +124,7 @@ public abstract class Save {
     }
 
 
-    public enum StatusPassed {BLOCK_ID_INITIALISED, EMPTY_WORLD_CREATED, LOAD_CHUNKS, FETCHING, SAVING, STOPPED }
+    public enum StatusPassed { FETCHING, SAVING, STOPPED }
     public abstract void callback (StatusPassed status);
 
     Date lastCallBack = new Date();

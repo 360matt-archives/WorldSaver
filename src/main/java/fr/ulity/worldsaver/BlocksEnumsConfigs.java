@@ -51,7 +51,7 @@ public class BlocksEnumsConfigs {
         blocksID = new Config(file);
 
         if (!file.exists()) {
-            blocksID.addDefaultsFromInputStream(WorldSaver.class.getResourceAsStream("/fr/ulity/worldsaver/referencing/" + version + ".yml"));
+            blocksID.addDefaultsFromInputStream(WorldSaverApi.class.getResourceAsStream("/fr/ulity/worldsaver/referencing/" + version + ".yml"));
         }
 
 
